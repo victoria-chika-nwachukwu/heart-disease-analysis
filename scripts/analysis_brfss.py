@@ -17,7 +17,7 @@ Analytical spine of this project:
   5. Interrogate the healthcare-access finding, including the confounder test
      that most analyses of this dataset skip.
 
-Author: [Your Name]
+Author: Victoria Chika Nwachukwu
 ================================================================================
 """
 
