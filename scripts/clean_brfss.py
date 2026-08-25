@@ -14,7 +14,7 @@ nothing without the BRFSS codebook (e.g. Income = 6 means "$35,000-$49,999").
 Decoding these is the core work of this stage: it makes every downstream chart
 and SQL query self-explanatory instead of requiring a lookup table.
 
-Author: [Your Name]
+Author: Victoria Chika Nwachukwu
 ================================================================================
 """
 
