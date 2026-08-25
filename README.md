@@ -45,7 +45,7 @@ Correlation coefficients compress badly on binary survey data. Relative risk ans
 ├── charts/                 Six figures
 ├── scripts/
 │   ├── clean_brfss.py      Stage 1 — cleaning and codebook decoding
-│   └── analysis_brfss.py   Stage 2 — KPIs and visualisation
+│   └── analysis_brfss.py   Stage 2 — KPIs and visualization
 ├── reports/
 │   ├── data_quality_report.md
 │   └── kpi_summary.csv     21 headline metrics
