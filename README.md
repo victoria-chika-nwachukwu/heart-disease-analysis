@@ -1,77 +1,76 @@
 # Heart Disease in the U.S. Adult Population
 
-An end-to-end analysis of **253,680 respondents** from the CDC Behavioral Risk Factor Surveillance System (BRFSS), 2015.
+An analysis of 253,680 survey responses from the CDC Behavioral Risk Factor Surveillance System (BRFSS), 2015.
 
-**[→ Open the interactive dashboard](https://victoria-chika-nwachukwu.github.io/heart-disease-analysis/dashboard.html)**
+[Open the interactive dashboard](https://victoria-chika-nwachukwu.github.io/heart-disease-analysis/dashboard.html)
 
----
+## Why I chose this
 
-## What this project shows
+I studied medical laboratory science, so healthcare data is what I know best. I wanted a project where I could ask real questions instead of just cleaning a file and making charts.
 
-**Baseline prevalence: 9.42%** — 23,893 respondents reported coronary heart disease or a heart attack.
+What surprised me most was the scale. 23,893 people in this survey reported coronary heart disease or a heart attack. That is 9.42% of everyone surveyed, and this is not a survey of hospital patients. It is ordinary adults.
 
-Three findings:
+## What I found
 
-**1. Risk compounds, it doesn't add.**
-People carrying all six modifiable risk factors have **42.0%** prevalence, against **1.2%** for those with none — a 36× spread.
+**Risk factors stack up fast.** I counted how many of six modifiable risk factors each person had. People with none had a 1.2% rate. People with all six had 42.0%. That is 36 times higher.
 
-**2. Poverty behaves like a cardiac risk factor.**
-Prevalence is **3.1× higher** in the lowest income bracket than the highest (15.8% vs 5.1%), falling almost monotonically across all eight bands.
+**Income matters more than I expected.** The rate is 15.8% in the lowest income bracket and 5.1% in the highest, and it drops steadily in between.
 
-**3. Insurance is not the same as access.**
-Respondents who *have* coverage but skipped a doctor over cost show the **highest prevalence of any access group — 13.2%**, above both the uninsured (7.0%) and those reporting no barrier (9.3%).
+**Having insurance is not the same as being able to use it.** People who have coverage but skipped seeing a doctor because of cost had the highest rate of any group, at 13.2%. That is higher than people with no insurance at all, who came in at 7.0%.
 
-That third result looks backwards, so I tested it. Age was the obvious confounder — the uninsured are the youngest group. Re-running the comparison **within each age bracket**, the cost-deterred group still leads in **all 13 brackets**, and they are younger on average than the no-barrier group. The crude figure was understating the gap, not inflating it.
+That last one looked wrong to me, so I checked it. My first thought was age, because uninsured people tend to be younger and age drives heart disease. So I compared the groups within each age bracket separately. The cost-deterred group was still higher in all 13 brackets. They are also younger on average than the group reporting no barriers, which means the plain number was hiding the gap rather than creating it.
 
-![Access paradox](charts/06_access_paradox.png)
+![Access barrier comparison](charts/06_access_paradox.png)
 
----
+## Two things I decided differently
 
-## Two decisions worth explaining
+**I kept the duplicate rows.**
 
-**Duplicate rows were kept, not dropped.**
-The raw file contains 23,899 exact duplicate rows. Most published analyses delete them. With 22 mostly-binary columns describing a quarter-million people, identical rows are statistically expected — two different respondents can easily produce the same answers. There is no respondent ID to prove otherwise, so deleting them would remove real people and bias every rate. They were retained and flagged in `is_duplicate_profile`. Dropping them would shift the headline rate by 0.9pp; the reasoning is documented in [`reports/data_quality_report.md`](reports/data_quality_report.md).
+The file has 23,899 rows that are exact copies of another row. Most people who use this dataset delete them. I did not.
 
-**Relative risk was used instead of correlation.**
-Correlation coefficients compress badly on binary survey data. Relative risk answers the question that actually matters: how many times more likely is someone with this factor to have heart disease? It also reorders the story — obesity ranks second-to-last at 1.39×, while high blood pressure reaches 4.00× and affects 43% of the population.
+The survey has 22 columns and most of them are yes or no answers. With 253,680 people answering, two different people giving the same 22 answers is not strange. It is expected. There is no ID column, so there is no way to tell a genuine duplicate from two similar people. Deleting them would mean deleting real respondents.
 
----
+The full reasoning is in [reports/data_quality_report.md](reports/data_quality_report.md).
 
-## Repository structure
+**I used relative risk instead of correlation.**
+
+Correlation does not work well when almost every column is a yes or no. Relative risk asks a simpler question: how many times more likely is someone with this factor to have heart disease?
+
+It changed the ranking. Obesity came out near the bottom at 1.39 times. High blood pressure came out at 4.00 times, and it affects 43% of the people surveyed. So blood pressure is both the stronger signal and the far more common one.
+
+## Files
 
 ```
-├── dashboard.html          Interactive dashboard (self-contained, no install)
-├── findings_report.md      Full written analysis
-├── charts/                 Six figures
-├── scripts/
-│   ├── clean_brfss.py      Stage 1 — cleaning and codebook decoding
-│   └── analysis_brfss.py   Stage 2 — KPIs and visualization
-├── reports/
-│   ├── data_quality_report.md
-│   └── kpi_summary.csv     21 headline metrics
-└── data/                   Raw BRFSS 2015 file
+dashboard.html             Interactive dashboard, opens in any browser
+findings_report.md         Full written analysis
+charts/                    Six figures
+scripts/
+  clean_brfss.py           Cleaning and decoding
+  analysis_brfss.py        KPIs and charts
+reports/
+  data_quality_report.md
+  kpi_summary.csv          21 metrics
+data/                      Raw BRFSS 2015 file
 ```
 
----
+## How I did it
 
-## Method
+**Cleaning.** The raw file is all numbers. Every answer is a code, so `Income = 6` means `$35,000-$49,999` and nothing in the file tells you that. I decoded every column against the BRFSS codebook. For the sex column I checked the data first instead of trusting the codebook, because a wrong assumption there would flip every result by sex. I range-checked all 22 columns and built four new ones, including the risk factor count and the healthcare access measure.
 
-**Cleaning** — the raw file is fully numeric-encoded, so every column was decoded against the BRFSS codebook (`Income = 6` → `$35,000–$49,999`). The `Sex` encoding was verified empirically before trusting the codebook. All 22 columns were range-checked; four features were derived, including a 0–6 risk factor count and a three-level healthcare access measure.
+**Analysis.** 21 metrics covering relative risk, the risk factor curve, the income gradient, and the age-by-age access comparison.
 
-**Analysis** — 21 KPIs covering relative risk, dose-response, socioeconomic gradient, and age-stratified access comparison.
+**Dashboard.** I pre-aggregated the 253,680 rows into a 13,200 cell summary and embedded it in one HTML file, so it runs without a server. When you filter by age, the age chart still shows every bracket. Any group with fewer than 100 people is hidden, because a rate built on three respondents is not a rate.
 
-**Dashboard** — 253,680 rows pre-aggregated into a 13,200-cell cube embedded in a single HTML file. Cross-filtering excludes each chart's own dimension, so filtering by age still shows the full age distribution. Cohorts under 100 respondents are suppressed.
+## What this analysis cannot tell you
+
+- People reported their own conditions. Anyone undiagnosed is invisible here, so the real rate is probably higher.
+- This is one year of data with no follow-up. Nothing here shows cause.
+- BRFSS provides survey weights for national estimates. I did not apply them. These are sample figures.
+- Only 9.4% of the sample has heart disease. If anyone builds a model on this, accuracy would be the wrong measure.
 
 ## Tools
 
-Python (pandas, numpy, matplotlib) · SQL · HTML/JavaScript
-
-## Limitations
-
-- Self-reported data; undiagnosed cases cannot appear, so prevalence is likely underestimated
-- Cross-sectional single year — **no causal claims**
-- BRFSS survey weights not applied; figures are sample prevalence, not weighted national estimates
-- 9.4% positive class — accuracy would be a misleading metric for any predictive modelling
+Python (pandas, numpy, matplotlib), SQL, HTML and JavaScript
 
 ## Source
 
