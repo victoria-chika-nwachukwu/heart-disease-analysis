@@ -128,7 +128,7 @@ body{
   font-size:15.5px;letter-spacing:-.012em;margin:0 0 3px;
 }
 .panel .note{font-size:12px;color:var(--muted);margin:0 0 14px;line-height:1.45}
-.chart{width:100%;display:block;overflow:visible}
+.chart{width:100%;height:auto;max-width:660px;display:block;overflow:visible}
 .empty{
   padding:26px 0;text-align:center;color:var(--muted);
   font-size:12.5px;font-style:italic;
@@ -137,11 +137,11 @@ body{
 /* ---------- svg type ---------- */
 .bar{transition:opacity .12s}
 .bar:hover{opacity:.78}
-.vlab{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600;fill:var(--ink)}
-.clab{font-family:"IBM Plex Sans",sans-serif;font-size:10.5px;fill:var(--ink-2)}
-.nlab{font-family:"IBM Plex Mono",monospace;font-size:8.5px;fill:var(--muted)}
-.baserule{stroke:var(--ink);stroke-width:1;stroke-dasharray:3 3;opacity:.55}
-.baselab{font-family:"IBM Plex Mono",monospace;font-size:8.5px;fill:var(--ink);opacity:.75}
+.vlab{font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:600;fill:var(--ink)}
+.clab{font-family:"IBM Plex Sans",sans-serif;font-size:12.5px;font-weight:500;fill:var(--ink-2)}
+.nlab{font-family:"IBM Plex Mono",monospace;font-size:10.5px;fill:var(--muted)}
+.baserule{stroke:var(--ink);stroke-width:1.2;stroke-dasharray:4 4;opacity:.5}
+.baselab{font-family:"IBM Plex Mono",monospace;font-size:10px;fill:var(--ink);opacity:.7}
 
 /* ---------- legend + footer ---------- */
 .legend{
@@ -290,11 +290,11 @@ function drawBars(mount, dim){
     return;
   }
 
-  const W = 100, PAD_L = 4, PAD_R = 2;
-  const rowH = 26, top = 14, bot = 20;
+  const W = 620, PAD_L = 10, PAD_R = 8, VAL_W = 62;
+  const rowH = 34, top = 16, bot = 28;
   const H = top + shown.length * rowH + bot;
-  const maxR = Math.max(...shown.map(d => d.r), BASELINE) * 1.24;
-  const plotW = W - PAD_L - PAD_R;
+  const maxR = Math.max(...shown.map(d => d.r), BASELINE) * 1.06;
+  const plotW = W - PAD_L - PAD_R - VAL_W;
   const x = r => PAD_L + (r / maxR) * plotW;
 
   let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img"
@@ -302,19 +302,19 @@ function drawBars(mount, dim){
 
   // baseline rule
   const bx = x(BASELINE);
-  svg += `<line class="baserule" x1="${bx}" y1="${top-6}" x2="${bx}" y2="${H-bot+4}"/>`;
-  svg += `<text class="baselab" x="${bx}" y="${H-bot+13}" text-anchor="middle">9.4%</text>`;
+  svg += `<line class="baserule" x1="${bx}" y1="${top-8}" x2="${bx}" y2="${H-bot+8}"/>`;
+  svg += `<text class="baselab" x="${bx}" y="${H-bot+22}" text-anchor="middle">baseline 9.4%</text>`;
 
   shown.forEach((d, i) => {
     const y = top + i * rowH;
-    const w = Math.max(x(d.r) - PAD_L, 0.4);
+    const w = Math.max(x(d.r) - PAD_L, 1.5);
     const hot = d.r > BASELINE;
     const fill = hot ? "var(--alert)" : "var(--teal)";
-    svg += `<text class="clab" x="${PAD_L}" y="${y+6}">${d.l}</text>`;
-    svg += `<rect class="bar" x="${PAD_L}" y="${y+9}" width="${w}" height="10"
-             rx="0.6" fill="${fill}"><title>${d.l} — ${pct(d.r)} of ${num(d.n)} respondents</title></rect>`;
-    svg += `<text class="vlab" x="${PAD_L+w+1.6}" y="${y+17}">${pct(d.r)}</text>`;
-    svg += `<text class="nlab" x="${W-PAD_R}" y="${y+6}" text-anchor="end">n=${num(d.n)}</text>`;
+    svg += `<text class="clab" x="${PAD_L}" y="${y+11}">${d.l}</text>`;
+    svg += `<rect class="bar" x="${PAD_L}" y="${y+15}" width="${w}" height="13"
+             rx="1.5" fill="${fill}"><title>${d.l}: ${pct(d.r)} of ${num(d.n)} respondents</title></rect>`;
+    svg += `<text class="vlab" x="${PAD_L+w+6}" y="${y+26}">${pct(d.r)}</text>`;
+    svg += `<text class="nlab" x="${W-PAD_R}" y="${y+11}" text-anchor="end">n=${num(d.n)}</text>`;
   });
 
   svg += `</svg>`;
